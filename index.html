@@ -530,209 +530,166 @@
       <div class="attractTap">Tap to Start</div>
     </div>
   </div>
+<script>
+  /* ===== CLOCK ===== */
+  function updateClock(){
+    const now = new Date();
+    document.getElementById("time").textContent =
+      now.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+    document.getElementById("date").textContent =
+      now.toLocaleDateString([], { weekday:"long", year:"numeric", month:"short", day:"numeric" });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
 
-  <script>
-    /* ===== CLOCK ===== */
-    function updateClock(){
-      const now = new Date();
-      document.getElementById("time").textContent =
-        now.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
-      document.getElementById("date").textContent =
-        now.toLocaleDateString([], { weekday:"long", year:"numeric", month:"short", day:"numeric" });
+  /* ===== FULLSCREEN ===== */
+  function toggleFullscreen(){
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(()=>{});
+    } else {
+      document.exitFullscreen?.().catch(()=>{});
     }
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    /* ===== FULLSCREEN ===== */
-    function toggleFullscreen(){
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen?.().catch(()=>{});
-      } else {
-        document.exitFullscreen?.().catch(()=>{});
-      }
+  }
+  function forceFullscreenAttempt(){
+    if(!document.fullscreenElement){
+      document.documentElement.requestFullscreen?.().catch(()=>{});
     }
+  }
+  window.addEventListener("load", () => setTimeout(forceFullscreenAttempt, 400));
+  document.addEventListener("fullscreenchange", () => {
+    if(!document.fullscreenElement) setTimeout(forceFullscreenAttempt, 400);
+  });
 
-    function forceFullscreenAttempt(){
-      if(!document.fullscreenElement){
-        document.documentElement.requestFullscreen?.().catch(()=>{});
-      }
-    }
-    window.addEventListener("load", () => setTimeout(forceFullscreenAttempt, 400));
-    document.addEventListener("fullscreenchange", () => {
-      if(!document.fullscreenElement) setTimeout(forceFullscreenAttempt, 400);
-    });
+  /* ===== OVERLAY (AUTO-HIDE) ===== */
+  const overlay = document.getElementById("overlay");
+  const overlayTitle = document.getElementById("overlayTitle");
+  let overlayAutoHide = null;
 
-    /* ===== OVERLAY (AUTO-HIDE) ===== */
-    const overlay = document.getElementById("overlay");
-    const overlayTitle = document.getElementById("overlayTitle");
-    let overlayAutoHide = null;
+  function showOverlay(title){
+    overlayTitle.textContent = title;
+    overlay.style.display = "flex";
+    if (overlayAutoHide) clearTimeout(overlayAutoHide);
+    overlayAutoHide = setTimeout(() => hideOverlay(), 4000);
+  }
+  function hideOverlay(){
+    overlay.style.display = "none";
+  }
 
-    function showOverlay(title){
-      overlayTitle.textContent = title;
-      overlay.style.display = "flex";
-      if (overlayAutoHide) clearTimeout(overlayAutoHide);
-      overlayAutoHide = setTimeout(() => hideOverlay(), 6000);
-    }
-    function hideOverlay(){
-      overlay.style.display = "none";
-    }
+  /* ===== TOAST ===== */
+  const toast = document.getElementById("toast");
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.display = "block";
+  }
+  function hideToast(){
+    toast.style.display = "none";
+  }
 
-    /* ===== POPUP AUTO-CLOSE ===== */
-    let externalWin = null;
-    let externalIdleTimer = null;
-    const EXTERNAL_IDLE_SECONDS = 300; // 5 minutes
+  /* ===== ATTRACT SCREEN ===== */
+  const attract = document.getElementById("attract");
+  const ATTRACT_AFTER_SECONDS = 60;
+  function showAttract(){ attract.style.display = "flex"; }
+  function hideAttract(){ attract.style.display = "none"; }
 
-    function startExternalIdleClose(){
-      if (externalIdleTimer) clearInterval(externalIdleTimer);
-      let secondsLeft = EXTERNAL_IDLE_SECONDS;
+  ["mousedown","touchstart","mousemove","keydown"].forEach(evt=>{
+    window.addEventListener(evt, hideAttract, { passive:true });
+  });
 
-      externalIdleTimer = setInterval(() => {
-        if (!externalWin || externalWin.closed){
-          clearInterval(externalIdleTimer);
-          externalIdleTimer = null;
-          return;
-        }
+  /* ===== KIOSK NAV / HOME RETURN ===== */
+  const HOME_URL = location.href.split("#")[0].split("?")[0]; // stable "home" url
+  let isOnExternalPage = false;
 
-        secondsLeft--;
+  function goHome(){
+    isOnExternalPage = false;
+    hideOverlay();
+    hideToast();
+    hideAttract();
+    // reload kiosk home cleanly
+    window.location.href = HOME_URL;
+  }
 
-        if (secondsLeft <= 0){
-          try { externalWin.close(); } catch(e){}
-          clearInterval(externalIdleTimer);
-          externalIdleTimer = null;
+  /* ===== IDLE TIMER ===== */
+  const IDLE_LIMIT_SECONDS = 120;
+  let idleSeconds = 0;
+  let idleTimer = null;
 
-          try { window.focus(); } catch(e){}
-          goHome(false);
-        }
-      }, 1000);
-    }
+  function startIdleTimer(){
+    if (idleTimer) clearInterval(idleTimer);
+    idleSeconds = 0;
+    hideToast();
 
-    /* ===== TOAST ===== */
-    const toast = document.getElementById("toast");
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.style.display = "block";
-    }
-    function hideToast(){
-      toast.style.display = "none";
-    }
+    idleTimer = setInterval(() => {
+      idleSeconds++;
 
-    /* ===== ATTRACT SCREEN ===== */
-    const attract = document.getElementById("attract");
-    const ATTRACT_AFTER_SECONDS = 60;
-
-    function showAttract(){ attract.style.display = "flex"; }
-    function hideAttract(){ attract.style.display = "none"; }
-
-    ["mousedown","touchstart","mousemove","keydown"].forEach(evt=>{
-      window.addEventListener(evt, hideAttract, { passive:true });
-    });
-
-    /* ===== IDLE RESET (HOME) ===== */
-    const IDLE_LIMIT_SECONDS = 120;
-    let idleSeconds = 0;
-    let idleTimer = null;
-
-    function startIdleTimer(){
-      stopIdleTimer();
-      idleSeconds = 0;
-      hideToast();
-      updateIdlePill();
-
-      idleTimer = setInterval(() => {
-        idleSeconds++;
-        updateIdlePill();
-
-        const remaining = Math.max(0, IDLE_LIMIT_SECONDS - idleSeconds);
-
-        if (idleSeconds === ATTRACT_AFTER_SECONDS) showAttract();
-        if (remaining === 10) showToast("Returning to Home in 10 seconds…");
-        if (remaining === 0) {
-          hideToast();
-          goHome(false);
-        }
-      }, 1000);
-    }
-
-    function stopIdleTimer(){
-      if (idleTimer) clearInterval(idleTimer);
-      idleTimer = null;
-    }
-
-    function resetIdle(){
-      idleSeconds = 0;
-      hideToast();
-      hideAttract();
-      updateIdlePill();
-    }
-
-    function updateIdlePill(){
       const remaining = Math.max(0, IDLE_LIMIT_SECONDS - idleSeconds);
       document.getElementById("idlePill").textContent = `Idle reset: ${remaining}s`;
-    }
 
-    // Activity detection
-    ["mousemove","mousedown","keydown","touchstart","touchmove","scroll","wheel"]
-      .forEach(evt => window.addEventListener(evt, resetIdle, { passive:true }));
+      if (idleSeconds === ATTRACT_AFTER_SECONDS) showAttract();
+      if (remaining === 10) showToast("Returning to Home in 10 seconds…");
 
-    // Home function
-    function goHome(manual){
-      hideOverlay();
-      hideToast();
-      hideAttract();
-      resetIdle();
-      startIdleTimer();
-    }
-
-    /* ===== OPEN LINKS EXTERNALLY (CONTROLLED WINDOW) ===== */
-    function openExternal(title, url){
-      showOverlay(title);
-
-      // close previous popup if open
-      try { if (externalWin && !externalWin.closed) externalWin.close(); } catch(e){}
-
-      externalWin = window.open(
-        url,
-        "tte_kiosk_external",
-        "noopener,noreferrer,width=1200,height=800"
-      );
-
-      startExternalIdleClose();
-
-      resetIdle();
-      startIdleTimer();
-    }
-
-    // Wire tiles
-    document.querySelectorAll("button.tile").forEach(btn => {
-      btn.addEventListener("click", () => {
-        openExternal(btn.dataset.title, btn.dataset.url);
-      });
-    });
-
-    // Staff shortcut: Ctrl + Shift + H = Home
-    document.addEventListener("keydown", (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "h") {
-        goHome(true);
+      if (remaining === 0) {
+        hideToast();
+        // If we’re on an external site, return to kiosk home
+        if (isOnExternalPage || location.href.split("#")[0].split("?")[0] !== HOME_URL) {
+          goHome();
+          return;
+        }
+        // If we're already home, just reset counters
+        idleSeconds = 0;
       }
-    });
+    }, 1000);
+  }
 
-    // Optional: hide cursor after 3 seconds
-    let cursorTimer;
-    function resetCursor(){
-      document.body.classList.remove("idleCursor");
-      clearTimeout(cursorTimer);
-      cursorTimer = setTimeout(()=> document.body.classList.add("idleCursor"), 3000);
+  function resetIdle(){
+    idleSeconds = 0;
+    hideToast();
+    hideAttract();
+    document.getElementById("idlePill").textContent = `Idle reset: ${IDLE_LIMIT_SECONDS}s`;
+  }
+
+  ["mousemove","mousedown","keydown","touchstart","touchmove","scroll","wheel"]
+    .forEach(evt => window.addEventListener(evt, resetIdle, { passive:true }));
+
+  /* ===== OPEN LINKS (SAME TAB - MOST RELIABLE) ===== */
+  function openExternal(title, url){
+    showOverlay(title);
+    isOnExternalPage = true;
+    // go to the site in the same tab
+    window.location.href = url;
+  }
+
+  document.querySelectorAll("button.tile").forEach(btn => {
+    btn.addEventListener("click", () => {
+      openExternal(btn.dataset.title, btn.dataset.url);
+    });
+  });
+
+  // Staff shortcut: Ctrl + Shift + H = Home
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "h") {
+      goHome();
     }
-    ["mousemove","mousedown","touchstart"].forEach(evt=>{
-      window.addEventListener(evt, resetCursor, { passive:true });
-    });
-    resetCursor();
+  });
 
-    // Start idle timer immediately
-    startIdleTimer();
+  // Optional: hide cursor after 3 seconds
+  let cursorTimer;
+  function resetCursor(){
+    document.body.classList.remove("idleCursor");
+    clearTimeout(cursorTimer);
+    cursorTimer = setTimeout(()=> document.body.classList.add("idleCursor"), 3000);
+  }
+  ["mousemove","mousedown","touchstart"].forEach(evt=>{
+    window.addEventListener(evt, resetCursor, { passive:true });
+  });
+  resetCursor();
 
-    // Disable right click (optional kiosk hardening)
-    document.addEventListener("contextmenu", e => e.preventDefault());
-  </script>
+  // Start idle timer immediately
+  startIdleTimer();
+
+  // Disable right click (optional kiosk hardening)
+  document.addEventListener("contextmenu", e => e.preventDefault());
+</script>
+  
 </body>
 </html>
+
