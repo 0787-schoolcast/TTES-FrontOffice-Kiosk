@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tyrone Thompson Elementary • Family Kiosk</title>
+
+  <style>
+    :root{
+      /* LSU colors */
+      --purple:#461D7C;
+      --purpleDark:#35145f;
+      --gold:#FDB927;
+
+      --bg:#f6f4fb;
+      --card:#ffffff;
+      --border:#e7e2f2;
+      --text:#111827;
+      --muted:#4b5563;
+
+      --radius:20px;  
+      --shadow:0 16px 40px rgba(2,6,23,.12);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 12% 18%, rgba(70,29,124,.16), transparent 60%),
+        radial-gradient(900px 600px at 88% 16%, rgba(253,185,39,.16), transparent 60%),
+        var(--bg);
+      display:flex;
+      justify-content:center;
+      padding:24px;
+      user-select:none;
+    }
+
+    .wrap{ width:min(1100px, 100%); }
+
+    /* Banner */
+    .banner{
+      background: linear-gradient(90deg, var(--purple), var(--purpleDark));
+      color:#fff;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.18);
+      padding:16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .logo{
+      width:58px; height:58px;
+      border-radius:16px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.25);
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+    .logo img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      padding:7px;
+    }
+    .logoFallback{
+      font-weight:900;
+      letter-spacing:.5px;
+      opacity:.95;
+    }
+
+    .school{ min-width:0; }
+    .school h1{
+      margin:0;
+      font-size: clamp(20px, 2.6vw, 32px);
+      line-height:1.1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .school p{
+      margin:6px 0 0 0;
+      opacity:.92;
+      font-size:13px;
+    }
+
+    .clock{
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:14px;
+      padding:10px 12px;
+      min-width:180px;
+      text-align:right;
+    }
+    .clock .t{ font-size:20px; font-weight:900; }
+    .clock .d{ font-size:12px; opacity:.92; margin-top:2px; }
+
+    /* Layout */
+    .content{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+    }
+    @media (max-width: 920px){
+      .content{ grid-template-columns:1fr; }
+      .banner{ flex-direction:column; align-items:flex-start; }
+      .clock{ text-align:left; }
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .panel h2{
+      margin:0 0 8px 0;
+      font-size:18px;
+    }
+    .hint{
+      margin:0 0 14px 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    /* Tiles */
+    .tiles{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+
+    button.tile{
+      width:100%;
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+      display:flex;
+      align-items:flex-start;
+      gap:14px;
+      cursor:pointer;
+      text-align:left;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    button.tile:hover, button.tile:focus{
+      transform: translateY(-2px);
+      border-color: rgba(70,29,124,.35);
+      box-shadow: 0 14px 28px rgba(2,6,23,.10);
+      outline:none;
+    }
+
+    .ico{
+      width:48px; height:48px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-size:22px;
+      background: rgba(70,29,124,.10);
+      border:1px solid rgba(70,29,124,.16);
+      flex:0 0 auto;
+    }
+
+    .tile .text{ flex:1 1 auto; }
+    .tile .title{ margin:0 0 4px 0; font-weight:900; font-size:16px; }
+    .tile .desc{ margin:0; color:var(--muted); font-size:13px; line-height:1.35; }
+
+    .openbtn{
+      flex:0 0 auto;
+      background: var(--gold);
+      color:#1f1400;
+      border:1px solid rgba(0,0,0,.08);
+      padding:10px 12px;
+      border-radius:14px;
+      font-weight:900;
+      white-space:nowrap;
+      margin-top:2px;
+    }
+
+    /* Right panel callouts */
+    .callout{
+      border-radius:18px;
+      padding:14px;
+      border:1px dashed rgba(70,29,124,.35);
+      background: rgba(70,29,124,.06);
+      margin-bottom:12px;
+    }
+    .callout h3{ margin:0 0 6px 0; font-size:15px; }
+    .callout p{ margin:0; color:var(--muted); font-size:13px; line-height:1.4; }
+
+    /* Bottom controls */
+    .bar{
+      margin-top:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      padding:8px 10px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid var(--border);
+      box-shadow: 0 10px 20px rgba(2,6,23,.06);
+      color:var(--text);
+      font-weight:800;
+      font-size:12px;
+    }
+    button.ctrl{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      font-weight:900;
+    }
+    button.ctrl.purple{
+      background: var(--purple);
+      color:#fff;
+      border-color: rgba(255,255,255,.12);
+    }
+    button.ctrl.gold{
+      background: var(--gold);
+      border-color: rgba(0,0,0,.08);
+      color:#1f1400;
+    }
+
+    /* Overlay message when opening external link */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background: rgba(17,24,39,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .modal{
+      width:min(560px, 100%);
+      background:#fff;
+      border-radius:22px;
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+    .modalTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .modal h4{ margin:0; font-size:16px; }
+    .modal p{ margin:8px 0 0 0; color:var(--muted); font-size:13px; line-height:1.4; }
+    .modal .modalBtns{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:14px;
+      flex-wrap:wrap;
+    }
+    .xbtn{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:12px;
+      padding:8px 10px;
+      font-weight:900;
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <!-- Header -->
+    <div class="banner">
+      <div class="left">
+        <div class="logo" aria-label="School logo">
+          <!-- Put your logo in the same folder and name it: trailblazer-logo.png -->
+          <img src="trailblazer-logo.png" alt="Trailblazer logo"
+               onerror="this.remove(); document.getElementById('logoFallback').style.display='block';" />
+          <div id="logoFallback" class="logoFallback" style="display:none;">TTE</div>
+        </div>
+
+        <div class="school">
+          <h1>Tyrone Thompson Elementary</h1>
+          <p>Trailblazers Family Kiosk • Quick Access for Parents</p>
+        </div>
+      </div>
+
+      <div class="clock" aria-label="Current time">
+        <div class="t" id="time">--:--</div>
+        <div class="d" id="date">---</div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="content" id="home">
+      <div class="panel">
+        <h2>Parent Quick Links</h2>
+        <p class="hint">
+          Tap a button to open the site. For privacy, this kiosk returns to the Home screen automatically when idle.
+        </p>
+
+        <div class="tiles" role="navigation" aria-label="Kiosk links">
+          <button class="tile"
+            data-title="Parents IC (Infinite Campus)"
+            data-url="https://www.ccsd.net/parents">
+            <div class="ico">👨‍👩‍👧‍👦</div>
+            <div class="text">
+              <div class="title">Parents IC (Infinite Campus)</div>
+              <p class="desc">Attendance, grades, schedules, and messages. (Opens in a new tab)</p>
+            </div>
+            <div class="openbtn" aria-hidden="true">Open</div>
+          </button>
+
+          <button class="tile"
+            data-title="Reset / Retrieve CCSD Account"
+            data-url="https://myaccount.ccsd.net/#/">
+            <div class="ico">🔐</div>
+            <div class="text">
+              <div class="title">Reset / Retrieve CCSD Account</div>
+              <p class="desc">Password reset for CCSD Google / AD accounts. (Opens in a new tab)</p>
+            </div>
+            <div class="openbtn" aria-hidden="true">Open</div>
+          </button>
+
+          <button class="tile"
+            data-title="Early Check-out Form"
+            data-url="https://docs.google.com/forms/d/e/1FAIpQLSeCLY4tX_coBHUXokTmbQ9vilP7g95Mqs2feN8oMDSMG74oyw/viewform?usp=sharing&ouid=115945897713826384472">
+            <div class="ico">📝</div>
+            <div class="text">
+              <div class="title">Early Check-out Form</div>
+              <p class="desc">Submit an early check-out request. (Opens in a new tab)</p>
+            </div>
+            <div class="openbtn" aria-hidden="true">Open</div>
+          </button>
+        </div>
+
+        <div class="bar">
+          <div class="controls">
+            <span class="pill" id="idlePill">Idle reset: --</span>
+            <button class="ctrl gold" onclick="goHome(true)">Home</button>
+            <button class="ctrl purple" onclick="toggleFullscreen()">Fullscreen</button>
+            <button class="ctrl" onclick="location.reload()">Refresh</button>
+          </div>
+          <div>Tip: Close any opened tabs when finished.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Need Help?</h2>
+        <p class="hint">Optional reminders for the front office.</p>
+
+        <div class="callout">
+          <h3>Front Office Support</h3>
+          <p>Please ask a staff member if you need assistance.</p>
+        </div>
+
+        <div class="callout">
+          <h3>Student Safety</h3>
+          <p>Bring a valid photo ID for student check-out.</p>
+        </div>
+
+        <div class="callout">
+          <h3>Privacy Reminder</h3>
+          <p>This kiosk resets back to Home when idle.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- External-open message -->
+  <div class="overlay" id="overlay" aria-live="polite">
+    <div class="modal">
+      <div class="modalTop">
+        <div>
+          <h4 id="overlayTitle">Opening…</h4>
+          <p id="overlayText">This will open in a new tab. Please close the tab when finished to protect student privacy.</p>
+        </div>
+        <button class="xbtn" onclick="hideOverlay()">✕</button>
+      </div>
+      <div class="modalBtns">
+        <button class="ctrl gold" onclick="hideOverlay()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== CLOCK ===== */
+    function updateClock(){
+      const now = new Date();
+      document.getElementById("time").textContent =
+        now.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+      document.getElementById("date").textContent =
+        now.toLocaleDateString([], { weekday:"long", year:"numeric", month:"short", day:"numeric" });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* ===== FULLSCREEN ===== */
+    function toggleFullscreen(){
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.().catch(()=>{});
+      } else {
+        document.exitFullscreen?.().catch(()=>{});
+      }
+    }
+
+    // Try fullscreen on load (may require kiosk mode / user gesture)
+    function forceFullscreenAttempt(){
+      if(!document.fullscreenElement){
+        document.documentElement.requestFullscreen?.().catch(()=>{});
+      }
+    }
+    window.addEventListener("load", () => setTimeout(forceFullscreenAttempt, 400));
+    document.addEventListener("fullscreenchange", () => {
+      // If someone exits, try to re-enter (may still require policy/gesture)
+      if(!document.fullscreenElement) setTimeout(forceFullscreenAttempt, 400);
+    });
+
+    /* ===== OVERLAY ===== */
+    const overlay = document.getElementById("overlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    function showOverlay(title){
+      overlayTitle.textContent = title;
+      overlay.style.display = "flex";
+    }
+    function hideOverlay(){
+      overlay.style.display = "none";
+    }
+
+    /* ===== IDLE RESET (HOME) ===== */
+    const IDLE_LIMIT_SECONDS = 120; // change if you want (ex: 90, 180)
+    let idleSeconds = 0;
+    let idleTimer = null;
+
+    function startIdleTimer(){
+      stopIdleTimer();
+      idleSeconds = 0;
+      updateIdlePill();
+      idleTimer = setInterval(() => {
+        idleSeconds++;
+        updateIdlePill();
+        if (idleSeconds >= IDLE_LIMIT_SECONDS) {
+          goHome(false);
+        }
+      }, 1000);
+    }
+
+    function stopIdleTimer(){
+      if (idleTimer) clearInterval(idleTimer);
+      idleTimer = null;
+    }
+
+    function resetIdle(){
+      idleSeconds = 0;
+      updateIdlePill();
+    }
+
+    function updateIdlePill(){
+      const remaining = Math.max(0, IDLE_LIMIT_SECONDS - idleSeconds);
+      document.getElementById("idlePill").textContent = `Idle reset: ${remaining}s`;
+    }
+
+    // Activity detection
+    ["mousemove","mousedown","keydown","touchstart","touchmove","scroll","wheel"]
+      .forEach(evt => window.addEventListener(evt, resetIdle, { passive:true }));
+
+    // Home function (kept for consistency)
+    function goHome(manual){
+      hideOverlay();
+      resetIdle();
+      startIdleTimer();
+    }
+
+    /* ===== OPEN LINKS EXTERNALLY (NO IFRAMES) ===== */
+    function openExternal(title, url){
+      showOverlay(title);
+      window.open(url, "_blank", "noopener,noreferrer");
+      resetIdle();
+      startIdleTimer();
+    }
+
+    // Wire tiles
+    document.querySelectorAll("button.tile").forEach(btn => {
+      btn.addEventListener("click", () => {
+        openExternal(btn.dataset.title, btn.dataset.url);
+      });
+    });
+
+    // Start idle timer immediately
+    startIdleTimer();
+
+    // Disable right click (optional kiosk hardening)
+    document.addEventListener("contextmenu", e => e.preventDefault());
+  </script>
+</body>
+</html>
