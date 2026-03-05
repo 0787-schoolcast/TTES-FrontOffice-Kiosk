@@ -21,6 +21,30 @@
       --radius:22px;
       --shadow:0 18px 44px rgba(2,6,23,.14);
 
+/* Default background */
+body{
+  background:black;
+}
+
+/* Video background */
+#bgVideo{
+  position:fixed;
+  top:0;
+  left:0;
+  min-width:100%;
+  min-height:100%;
+  object-fit:cover;
+  z-index:-1;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:-1;
+}
+  
     /* Center the main kiosk panel nicely */
 .content{
   justify-items: center;   /* centers children inside the grid */
@@ -417,6 +441,11 @@
 </head>
 
 <body>
+
+<video autoplay muted loop playsinline id="bgVideo">
+  <source src="blazer.mov" type="video/mp4">
+</video>
+  
   <div class="wrap">
     <!-- Header -->
     <div class="banner">
@@ -710,6 +739,7 @@
   </script>
 </body>
 </html>
+
 
 
 
