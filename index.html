@@ -20,7 +20,17 @@
 
       --radius:22px;
       --shadow:0 18px 44px rgba(2,6,23,.14);
-    }
+
+    /* Center the main kiosk panel nicely */
+.content{
+  justify-items: center;   /* centers children inside the grid */
+}
+
+/* Make the main panel centered and not overly wide */
+.panel.main{
+  width: 100%;
+  max-width: 1100px;
+}
 
     *{ box-sizing:border-box; }
     body{
@@ -175,9 +185,14 @@
 
     /* Tiles (legit kiosk grid) */
     .tiles{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+  display:grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 14px;
+  justify-content: center;
+}
+@media (max-width: 920px){
+  .tiles{ grid-template-columns: 1fr; }
+}
     }
     @media (max-width: 920px){
       .tiles{ grid-template-columns:1fr; }
@@ -244,15 +259,17 @@
 
     /* Bottom controls */
     .bar{
-      margin-top:14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      color:var(--muted);
-      font-size:12px;
-      font-weight: 700;
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  text-align:center;
+}
     }
     .controls{
       display:flex;
@@ -424,7 +441,7 @@
 
     <!-- Main -->
     <div class="content" id="home">
-      <div class="panel">
+      <div class="panel main">
         <h2>Parent Quick Links</h2>
 
         <div class="welcome">
@@ -693,6 +710,7 @@
   </script>
 </body>
 </html>
+
 
 
 
